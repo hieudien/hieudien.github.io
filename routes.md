@@ -33,3 +33,6 @@
 - [Tự tạo blog cá nhân với AzerothJS cho người không biết code](#azeroth-js.md)
 - [Third Post With azeroth-js!](#third-post.md)
 - [Markdown Test Pag](#lorem-ipsum.md)
+- [Tự tạo blog cá nhân với AzerothJS cho người không biết code](#azeroth-js.md)
+- [Third Post With azeroth-js!](#third-post.md)
+- [Markdown Test Pag](#lorem-ipsum.md)
