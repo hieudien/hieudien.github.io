@@ -46,7 +46,9 @@
         }
         makeResponsive([canvas, anim_container, dom_overlay_container]);
         createLevel();
-        drawLine();
+        if (!detectMobile()) {
+          drawLine();
+        }
         // showEndgameScreen();
       }
       function onMouseDown(e) {
