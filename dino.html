@@ -47,6 +47,9 @@
         makeResponsive([canvas, anim_container, dom_overlay_container]);
         createLevel();
         drawLine();
+        if (detectMobile()) {
+          stage.removeChild(dotContainer);
+        }
         // showEndgameScreen();
       }
       function onMouseDown(e) {
@@ -56,9 +59,9 @@
         stage.removeChild(lib.hand);
         player.isShoted = true;
         const mousePos = caculateMousePos(e);
-        let magicNumber = -0.4;
+        let magicNumber = -0.3;
         if (mousePos.y > lib.height * 0.5) {
-          magicNumber = -1.7;
+          magicNumber = -1.4;
         }
         player.bubble.vy = (player.bubble.y - mousePos.y + 16) * magicNumber;
         player.bubble.vx = (player.bubble.x - mousePos.x + 16) * magicNumber;
@@ -238,8 +241,7 @@
           }
           bubbleGrid.push(subGrid);
         }
-        console.log(colors.reverse());
-        return colors[getRandomInt(0, 10)];
+        return colors.reverse()[getRandomInt(0, 1)];
       }
 
       function getRandomInt(min, max) {
@@ -837,7 +839,6 @@
       }
 
       function resetBullet() {
-        // stage.removeChild(player.bubble);
         setPlayer();
       }
       function makeResponsive(domContainers) {
