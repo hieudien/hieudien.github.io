@@ -730,22 +730,25 @@
       let animationArray = [];
       let aniCounter = 0;
       function runAnimation() {
-        setInterval(function () {
-          if (aniCounter < animationArray.length) {
-            const bubble = animationArray[aniCounter];
-            stage.addChild(bubble.ani);
-            bubble.ani.play();
-            stage.removeChild(bubble.tmpBubble);
-            bubble.ani.on("animationend", () => {
-              stage.removeChild(bubble.ani);
-            });
-            aniCounter++;
-          } else {
-            aniCounter = 0;
-            animationArray = [];
-            return;
-          }
-        }, 20);
+        setInterval(
+          function () {
+            if (aniCounter < animationArray.length) {
+              const bubble = animationArray[aniCounter];
+              stage.addChild(bubble.ani);
+              bubble.ani.play();
+              stage.removeChild(bubble.tmpBubble);
+              bubble.ani.on("animationend", () => {
+                stage.removeChild(bubble.ani);
+              });
+              aniCounter++;
+            } else {
+              aniCounter = 0;
+              animationArray = [];
+              return;
+            }
+          },
+          animationArray.length < 12 ? 200 : 20
+        );
       }
       function getNearBy(i, j) {
         return [
