@@ -24,6 +24,7 @@
       let isEnd = false;
       let outer;
       let bubbleGrid;
+      let bulletAmount = 6;
       function gameInit() {
         dapi.isReady()
           ? onReadyCallback()
@@ -52,16 +53,21 @@
         }
         // showEndgameScreen();
       }
+      function updateBulletAmount(amount) {
+        bulletAmount += amount;
+        lib.bulletText.set({ text: bulletAmount });
+      }
       function onMouseDown(e) {
-        if (isEnd || player.isShoted) {
+        if (isEnd || player.isShoted || bulletAmount === 0) {
           return;
         }
+        updateBulletAmount(-1);
         stage.removeChild(lib.hand);
         player.isShoted = true;
         const mousePos = caculateMousePos(e);
         let magicNumber = -0.3;
-        if (mousePos.y > lib.height * 0.5) {
-          magicNumber = -1.4;
+        if (mousePos.y > lib.height * 0.7) {
+          magicNumber = -1.1;
         }
         player.bubble.vy = (player.bubble.y - mousePos.y + 16) * magicNumber;
         player.bubble.vx = (player.bubble.x - mousePos.x + 16) * magicNumber;
@@ -241,7 +247,7 @@
           }
           bubbleGrid.push(subGrid);
         }
-        return colors.reverse()[getRandomInt(0, 1)];
+        return colors[colors.length - 1];
       }
 
       function getRandomInt(min, max) {
@@ -388,6 +394,16 @@
         lib.outer = new createjs.Sprite(spriteSheet);
         lib.outer.gotoAndStop(70);
 
+        lib.bulletText = new createjs.Text(
+          bulletAmount,
+          "bold 38px Courier New",
+          "#FF921E"
+        );
+        lib.bulletText.set({
+          x: lib.width * 0.4855,
+          y: lib.height * 0.847,
+        });
+
         // add child
         stage.addChild(
           lib.bg,
@@ -395,7 +411,8 @@
           lib.dinoHand,
           lib.bird,
           lib.installBtn,
-          lib.outer
+          lib.outer,
+          lib.bulletText
         );
         stage.children.forEach((child) => {
           child.set({
@@ -456,6 +473,10 @@
         handleBullet(event);
         cutLine();
         stage.update();
+        if (bulletAmount == 0) {
+          bulletAmount--;
+          endGame();
+        }
       }
       function cutLine() {
         for (let i = bubbleContainer.children.length - 1; i >= 0; i--) {
@@ -552,6 +573,9 @@
                 align = -13;
               }
               player.bubble.set({ x: bubble.x + align, y: bubble.y + 25 });
+              if (player.bubble.y > lib.height * 0.8) {
+                endGame();
+              }
               // make collision animation
               someAnimation(i, j);
               // remove bubbles
@@ -588,13 +612,20 @@
               dropEmptyRow();
               // check end game
               if (countBubble() == 0) {
-                isEnd = true;
-                showEndgameScreen();
+                endGame();
               }
               return;
             }
           }
         }
+      }
+
+      function endGame() {
+        console.log("ennd");
+        isEnd = true;
+        setTimeout(function () {
+          showEndgameScreen();
+        }, 500);
       }
 
       function someAnimation(i, j) {
