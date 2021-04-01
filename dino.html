@@ -66,8 +66,9 @@
         player.isShoted = true;
         const mousePos = caculateMousePos(e);
         let magicNumber = -0.3;
-        if (mousePos.y > lib.height * 0.7) {
-          magicNumber = -1.1;
+        if (mousePos.y > lib.height * 0.5) {
+          magicNumber = -1.5;
+          console.log("heree");
         }
         player.bubble.vy = (player.bubble.y - mousePos.y + 16) * magicNumber;
         player.bubble.vx = (player.bubble.x - mousePos.x + 16) * magicNumber;
