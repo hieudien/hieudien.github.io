@@ -539,7 +539,7 @@
           return;
         }
         let radius = 3;
-        let speed = 0.3;
+        let speed = 0.2;
         // bullet hit the border
         if (player.bubble.x > lib.width * 0.9 - radius) {
           player.bubble.vx *= -1;
@@ -574,6 +574,7 @@
                 align = -13;
               }
               player.bubble.set({ x: bubble.x + align, y: bubble.y + 25 });
+              drawCircle(player.bubble.getTransformedBounds());
               // resetBullet();
               // return;
               if (player.bubble.y > lib.height * 0.8) {
