@@ -24,7 +24,7 @@
       let isEnd = false;
       let outer;
       let bubbleGrid;
-      let bulletAmount = 6;
+      let bulletAmount = 8;
       function gameInit() {
         dapi.isReady()
           ? onReadyCallback()
@@ -66,9 +66,8 @@
         player.isShoted = true;
         const mousePos = caculateMousePos(e);
         let magicNumber = -0.3;
-        if (mousePos.y > lib.height * 0.5) {
-          magicNumber = -1.5;
-          console.log("heree");
+        if (mousePos.y > lib.height * 0.4) {
+          magicNumber = -1.4;
         }
         player.bubble.vy = (player.bubble.y - mousePos.y + 16) * magicNumber;
         player.bubble.vx = (player.bubble.x - mousePos.x + 16) * magicNumber;
@@ -569,60 +568,78 @@
                 bubble.getTransformedBounds()
               )
             ) {
+              player.isShoted = false;
               let align = 13;
               if (player.bubble.x <= bubble.x) {
                 align = -13;
               }
               player.bubble.set({ x: bubble.x + align, y: bubble.y + 25 });
+              // resetBullet();
+              // return;
               if (player.bubble.y > lib.height * 0.8) {
                 endGame();
               }
               // make collision animation
-              someAnimation(i, j);
-              // remove bubbles
-              checkBubble(i, j, player.bubble);
-              if (animationArray.length === 0) {
-                // add player to container
-                if (!bubbleContainer.children[i + 1]) {
-                  const subContainer = new createjs.Container();
-                  for (let index = 0; index < 11; index++) {
-                    subContainer.addChild(new createjs.DisplayObject());
-                  }
-                  bubbleContainer.addChild(subContainer);
-                }
-                const tmpBubble = player.bubble.clone();
-                let posJ = align > 0 ? j + 1 : j;
-                if (
-                  bubbleContainer.children[i + 1].children[posJ] &&
-                  bubbleContainer.children[i + 1].children[posJ].color
-                ) {
-                  posJ += 1;
-                }
-                bubbleContainer.children[i + 1].children[posJ] = tmpBubble;
-                bubbleContainer.children[i + 1].children[posJ].set({
-                  color: player.bubble.color,
-                  ani: player.bubble.ani,
-                });
-                stage.removeChild(player.bubble);
-              } else {
-                runAnimation();
-              }
-              // reset bullet
-              resetBullet();
-              // drop empty
-              dropEmptyRow();
-              // check end game
-              if (countBubble() == 0) {
-                endGame();
-              }
+              let timeline = someAnimation(i, j);
+              timeline.paused = false;
+              timeline.onComplete = removeBubble(i, j, align);
               return;
             }
           }
         }
       }
 
+      function removeBubble(i, j, align) {
+        // remove bubbles
+        checkBubble(i, j, player.bubble);
+        if (animationArray.length === 0) {
+          // add player to container
+          if (!bubbleContainer.children[i + 1]) {
+            const subContainer = new createjs.Container();
+            for (let index = 0; index < 11; index++) {
+              subContainer.addChild(new createjs.DisplayObject());
+            }
+            bubbleContainer.addChild(subContainer);
+          }
+          const tmpBubble = player.bubble.clone();
+          let posJ = align > 0 ? j + 1 : j;
+          if (
+            bubbleContainer.children[i + 1].children[posJ] &&
+            bubbleContainer.children[i + 1].children[posJ].color
+          ) {
+            posJ += 1;
+          }
+          bubbleContainer.children[i + 1].children[posJ] = tmpBubble;
+          bubbleContainer.children[i + 1].children[posJ].set({
+            color: player.bubble.color,
+            ani: player.bubble.ani,
+          });
+          stage.removeChild(player.bubble);
+          taskAfterAnimation();
+        } else {
+          runAnimation();
+        }
+      }
+
+      function taskAfterAnimation() {
+        resetBullet();
+        // drop empty
+        dropEmptyRow();
+        // check end game
+        if (countBubble() == 0) {
+          endGame();
+        }
+      }
+
+      function sleep(milliseconds) {
+        const date = Date.now();
+        let currentDate = null;
+        do {
+          currentDate = Date.now();
+        } while (currentDate - date < milliseconds);
+      }
+
       function endGame() {
-        console.log("ennd");
         isEnd = true;
         setTimeout(function () {
           showEndgameScreen();
@@ -630,6 +647,7 @@
       }
 
       function someAnimation(i, j) {
+        let timeline = new createjs.Timeline({ paused: true });
         const nearBy = getNearBy(i, j);
         nearBy.forEach((sub) => {
           sub.forEach((pos) => {
@@ -640,15 +658,17 @@
             ) {
               const bubble = bubbleContainer.children[pos.i].children[pos.j];
               if (bubble) {
-                createjs.Tween.get(
+                const tween = new createjs.Tween(
                   bubbleContainer.children[pos.i].children[pos.j]
                 )
-                  .to({ y: bubble.y - 5 }, Math.floor(Math.random() * 100))
+                  .to({ y: bubble.y - 10 }, Math.floor(Math.random() * 100))
                   .to({ y: bubble.y }, Math.floor(Math.random() * 100));
+                timeline.addTween(tween);
               }
             }
           });
         });
+        return timeline;
       }
       function handleLine(bubble) {
         for (var i = 0; i < dotContainer.children.length; i++) {
@@ -704,10 +724,10 @@
       }
       function caculateEndPoint(mousePos, originPos, y) {
         /*
-        a = y2 - y1
-        b = x1 - x2
-        c = ax1 + by1
-        */
+              a = y2 - y1
+              b = x1 - x2
+              c = ax1 + by1
+              */
 
         const a = originPos.y - mousePos.y;
         const b = mousePos.x - originPos.x;
@@ -745,27 +765,25 @@
         }
         resetBullet();
 
-        setTimeout(() => {
-          toDropBubbles.forEach((tmpBubble) => {
-            createjs.Tween.get(tmpBubble, { loop: true })
-              .to(
-                { y: tmpBubble.y + 40 },
-                Math.floor(Math.random() * 200) + 200
-              )
-              .call(() => {
-                stage.removeChild(tmpBubble);
-              });
-          });
-        }, 700);
+        toDropBubbles.forEach((tmpBubble) => {
+          createjs.Tween.get(tmpBubble, { loop: true })
+            .to({ y: tmpBubble.y + 40 }, Math.floor(Math.random() * 200) + 200)
+            .call(() => {
+              stage.removeChild(tmpBubble);
+            });
+        });
       }
       let toExcludeCheck = [];
       let animationArray = [];
       let aniCounter = 0;
       function runAnimation() {
-        setInterval(
+        let animationInterval = setInterval(
           function () {
             if (aniCounter < animationArray.length) {
               const bubble = animationArray[aniCounter];
+              bubbleContainer.children[bubble.i].children[
+                bubble.j
+              ] = new createjs.DisplayObject();
               stage.addChild(bubble.ani);
               bubble.ani.play();
               stage.removeChild(bubble.tmpBubble);
@@ -774,12 +792,27 @@
               });
               aniCounter++;
             } else {
+              const playerAni = player.bubble.ani.clone();
+              stage.addChild(playerAni);
+              playerAni.set({
+                x: player.bubble.x,
+                y: player.bubble.y,
+                scaleX: player.bubble.scaleX,
+                scaleY: player.bubble.scaleY,
+              });
+              playerAni.play();
+              playerAni.on("animationend", () => {
+                stage.removeChild(playerAni);
+              });
+              stage.removeChild(player.bubble);
               aniCounter = 0;
               animationArray = [];
+              taskAfterAnimation();
+              clearInterval(animationInterval);
               return;
             }
           },
-          animationArray.length < 12 ? 200 : 20
+          animationArray.length < 12 ? 80 : 30
         );
       }
       function getNearBy(i, j) {
@@ -825,26 +858,27 @@
               const bubble = bubbleContainer.children[obj.i].children[obj.j];
               if (bubble && bubble.color === target.color) {
                 // drawCircle(bubble.getTransformedBounds());
-                bubble.ani.set({
-                  x: bubble.x,
-                  y: bubble.y,
-                  scaleX: bubble.scaleX,
-                  scaleY: bubble.scaleY,
-                });
-                bubble.ani.stop();
-                const tmpBubble = bubble.clone();
-                stage.addChild(tmpBubble);
-                animationArray.push({
-                  ani: bubble.ani,
-                  i: obj.i,
-                  j: obj.j,
-                  tmpBubble,
-                });
-
-                bubbleContainer.children[obj.i].children[
-                  obj.j
-                ] = new createjs.DisplayObject();
-                stage.removeChild(player.bubble);
+                if (
+                  !animationArray.some(
+                    (ani) => ani.i === obj.i && ani.j === obj.j
+                  )
+                ) {
+                  bubble.ani.set({
+                    x: bubble.x,
+                    y: bubble.y,
+                    scaleX: bubble.scaleX,
+                    scaleY: bubble.scaleY,
+                  });
+                  bubble.ani.stop();
+                  const tmpBubble = bubble.clone();
+                  // stage.addChild(tmpBubble);
+                  animationArray.push({
+                    ani: bubble.ani,
+                    i: obj.i,
+                    j: obj.j,
+                    tmpBubble,
+                  });
+                }
                 checkBubble(obj.i, obj.j, bubble);
               }
             }
