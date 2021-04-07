@@ -684,6 +684,7 @@
           }
         }
       }
+
       let dotContainer;
       function drawLine(mousePos, originPos, isRecursion) {
         if (isEnd) {
@@ -701,11 +702,19 @@
         if (!originPos) {
           originPos = { x: lib.width * 0.488, y: lib.height * 0.8 };
         }
-
-        for (let y = originPos.y - 10; y > 0; y -= 10) {
+        let dotDistance = 10;
+        if (
+          mousePos.y > 300 &&
+          (mousePos.x < 100 || mousePos.x > 215) &&
+          !isRecursion
+        ) {
+          dotDistance = 5;
+        }
+        for (let y = originPos.y - 10; y > 0; y -= dotDistance) {
           const dot = lib.pink.clone();
           const x = caculateEndPoint(mousePos, originPos, y).x;
           const angle = 10;
+
           if (x < 0) {
             drawLine({ x: x + angle, y: y - angle }, { x, y }, true);
             break;
@@ -713,6 +722,7 @@
             drawLine({ x: x - angle, y: y - angle }, { x, y }, true);
             break;
           }
+
           dot.set({
             x,
             y,
