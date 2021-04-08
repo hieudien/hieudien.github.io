@@ -65,9 +65,9 @@
         stage.removeChild(lib.hand);
         player.isShoted = true;
         const mousePos = caculateMousePos(e);
-        let magicNumber = -0.3;
+        let magicNumber = -0.5;
         if (mousePos.y > lib.height * 0.4) {
-          magicNumber = -1.4;
+          magicNumber = -1.5;
         }
         player.bubble.vy = (player.bubble.y - mousePos.y + 16) * magicNumber;
         player.bubble.vx = (player.bubble.x - mousePos.x + 16) * magicNumber;
@@ -822,8 +822,8 @@
               clearInterval(animationInterval);
               return;
             }
-          },
-          animationArray.length < 12 ? 80 : 30
+          }
+          // animationArray.length < 12 ? 80 : 30
         );
       }
       function getNearBy(i, j) {
